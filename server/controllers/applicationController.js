@@ -85,8 +85,42 @@ const getJobApplicants = async (req, res) => {
     });
   }
 };
+const updateApplicationStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const application = await Application.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Application status updated successfully",
+      application,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   applyJob,
   getMyApplications,
   getJobApplicants,
+  updateApplicationStatus,
 };

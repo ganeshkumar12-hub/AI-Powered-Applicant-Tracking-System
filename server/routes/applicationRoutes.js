@@ -6,6 +6,7 @@ const {
   applyJob,
   getMyApplications,
   getJobApplicants,
+  updateApplicationStatus,
 } = require("../controllers/applicationController");
 
 const {
@@ -13,16 +14,18 @@ const {
   recruiterOnly,
 } = require("../middleware/authMiddleware");
 
-// Applicant
+// Applicant Routes
 router.post("/", protect, applyJob);
 router.get("/my-applications", protect, getMyApplications);
 
-// Recruiter
-router.get(
-  "/job/:jobId",
+// Recruiter Routes
+router.get("/job/:jobId", protect, recruiterOnly, getJobApplicants);
+
+router.put(
+  "/:id/status",
   protect,
   recruiterOnly,
-  getJobApplicants
+  updateApplicationStatus
 );
 
 module.exports = router;
