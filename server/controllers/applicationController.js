@@ -46,7 +46,30 @@ const applyJob = async (req, res) => {
     });
   }
 };
+const getMyApplications = async (req, res) => {
+  try {
+    const applications = await Application.find({
+      applicant: req.user._id,
+    })
+      .populate(
+        "job",
+        "title company location employmentType salary"
+      )
+      .sort({ createdAt: -1 });
 
+    res.status(200).json({
+      success: true,
+      count: applications.length,
+      applications,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   applyJob,
+  getMyApplications,
 };
