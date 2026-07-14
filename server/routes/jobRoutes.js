@@ -8,6 +8,7 @@ const {
   getJobById,
   updateJob,
   deleteJob,
+  getRecruiterJobs,
 } = require("../controllers/jobController");
 
 const {
@@ -17,6 +18,7 @@ const {
 
 // Public Routes
 router.get("/", getAllJobs);
+router.get("/my-jobs", protect, recruiterOnly, getRecruiterJobs);
 router.get("/:id", getJobById);
 
 // Recruiter Routes
