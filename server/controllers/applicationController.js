@@ -38,7 +38,6 @@ const applyJob = async (req, res) => {
       message: "Application submitted successfully",
       application,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -51,11 +50,28 @@ const getMyApplications = async (req, res) => {
     const applications = await Application.find({
       applicant: req.user._id,
     })
-      .populate(
-        "job",
-        "title company location employmentType salary"
-      )
+      .populate("job", "title company location employmentType salary")
       .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: applications.length,
+      applications,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const getJobApplicants = async (req, res) => {
+  try {
+    const applications = await Application.find({
+      job: req.params.jobId,
+    })
+      .populate("applicant", "name email")
+      .populate("job", "title company location");
 
     res.status(200).json({
       success: true,
@@ -72,4 +88,5 @@ const getMyApplications = async (req, res) => {
 module.exports = {
   applyJob,
   getMyApplications,
+  getJobApplicants,
 };
