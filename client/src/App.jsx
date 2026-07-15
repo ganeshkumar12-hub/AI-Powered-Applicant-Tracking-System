@@ -1,20 +1,7 @@
-import Navbar from "./components/common/Navbar";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
-  return (
-    <>
-      <Navbar />
-
-      <h1
-        style={{
-          textAlign: "center",
-          marginTop: "50px",
-        }}
-      >
-        AI-Powered Applicant Tracking System
-      </h1>
-    </>
-  );
+  return <AppRoutes />;
 }
 
-export default App;
+export default App; 
