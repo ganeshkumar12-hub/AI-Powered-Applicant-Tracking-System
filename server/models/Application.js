@@ -19,45 +19,22 @@ const applicationSchema = new mongoose.Schema(
       default: "",
     },
 
-    status: {
-      type: String,
-      enum: [
-        "Applied",
-        "Shortlisted",
-        "Interview",
-        "Offered",
-        "Rejected",
-      ],
-      default: "Applied",
-    },
-
-    aiScore: {
-      type: Number,
-      default: 0,
-    },
-
-    aiSummary: {
+    coverLetter: {
       type: String,
       default: "",
     },
 
-    strengths: [
-      {
-        type: String,
-      },
-    ],
-
-    weaknesses: [
-      {
-        type: String,
-      },
-    ],
-
-    missingSkills: [
-      {
-        type: String,
-      },
-    ],
+    status: {
+      type: String,
+      enum: [
+        "Applied",
+        "Under Review",
+        "Shortlisted",
+        "Rejected",
+        "Hired",
+      ],
+      default: "Applied",
+    },
   },
   {
     timestamps: true,

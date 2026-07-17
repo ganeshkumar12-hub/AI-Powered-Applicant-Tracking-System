@@ -1,207 +1,160 @@
+import { useEffect, useState } from "react";
 import {
-
-  Paper,
-
-  Typography,
-
-  Stack,
-
+  Box,
   Button,
-
+  Card,
+  CardContent,
   Chip,
-
+  CircularProgress,
+  Grid,
+  Snackbar,
+  Alert,
+  Typography,
 } from "@mui/material";
 
-
-
-const jobs = [
-
-  {
-
-    company: "Google",
-
-    title: "Frontend Developer",
-
-    location: "Bangalore",
-
-    type: "Full Time",
-
-  },
-
-  {
-
-    company: "Microsoft",
-
-    title: "Java Developer",
-
-    location: "Hyderabad",
-
-    type: "Full Time",
-
-  },
-
-  {
-
-    company: "Infosys",
-
-    title: "Python Developer",
-
-    location: "Pune",
-
-    type: "Hybrid",
-
-  },
-
-  {
-
-    company: "Amazon",
-
-    title: "React Developer",
-
-    location: "Chennai",
-
-    type: "Remote",
-
-  },
-
-];
-
-
+import { getAllJobs } from "../../services/jobService";
+import { applyForJob } from "../../services/applicationService";
 
 function RecommendedJobs() {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    severity: "success",
+    message: "",
+  });
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      const data = await getAllJobs();
+      setJobs(data);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApply = async (jobId) => {
+    try {
+      const response = await applyForJob(jobId);
+
+      setSnackbar({
+        open: true,
+        severity: "success",
+        message: response.message,
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        severity: "error",
+        message:
+          error.response?.data?.message || "Failed to apply for job",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ textAlign: "center", my: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-
-    <Paper
-
-      elevation={3}
-
-      sx={{
-
-        mt: 4,
-
-        p: 3,
-
-        borderRadius: 4,
-
-      }}
-
-    >
-
-      <Typography
-
-        variant="h5"
-
-        fontWeight="bold"
-
-        mb={3}
-
-      >
-
-        🔥 Recommended Jobs
-
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h5" fontWeight="bold" mb={3}>
+        Recommended Jobs
       </Typography>
 
-
-
-      <Stack spacing={2}>
-
-        {jobs.map((job, index) => (
-
-          <Paper
-
-            key={index}
-
-            variant="outlined"
-
-            sx={{
-
-              p: 2,
-
-              borderRadius: 3,
-
-            }}
-
-          >
-
-            <Typography
-
-              variant="h6"
-
-              fontWeight="bold"
-
+      <Grid container spacing={3}>
+        {jobs.map((job) => (
+          <Grid item xs={12} md={6} key={job._id}>
+            <Card
+              elevation={3}
+              sx={{
+                borderRadius: 3,
+                height: "100%",
+              }}
             >
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold">
+                  {job.title}
+                </Typography>
 
-              {job.title}
+                <Typography color="text.secondary">
+                  {job.company}
+                </Typography>
 
-            </Typography>
+                <Typography sx={{ mt: 1 }}>
+                  📍 {job.location}
+                </Typography>
 
+                <Typography>
+                  💰 {job.salary}
+                </Typography>
 
+                <Typography>
+                  💼 {job.jobType}
+                </Typography>
 
-            <Typography color="text.secondary">
+                <Box
+                  sx={{
+                    mt: 2,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 1,
+                  }}
+                >
+                  {job.skills.map((skill, index) => (
+                    <Chip
+                      key={index}
+                      label={skill}
+                      color="primary"
+                      size="small"
+                    />
+                  ))}
+                </Box>
 
-              {job.company}
-
-            </Typography>
-
-
-
-            <Stack
-
-              direction="row"
-
-              spacing={1}
-
-              mt={1}
-
-            >
-
-              <Chip
-
-                label={job.location}
-
-                color="primary"
-
-              />
-
-
-
-              <Chip
-
-                label={job.type}
-
-                color="success"
-
-              />
-
-            </Stack>
-
-
-
-            <Button
-
-              variant="contained"
-
-              sx={{ mt: 2 }}
-
-            >
-
-              Apply Now
-
-            </Button>
-
-          </Paper>
-
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{ mt: 3 }}
+                  onClick={() => handleApply(job._id)}
+                >
+                  Apply Now
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
+      </Grid>
 
-      </Stack>
-
-    </Paper>
-
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() =>
+          setSnackbar({ ...snackbar, open: false })
+        }
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() =>
+            setSnackbar({ ...snackbar, open: false })
+          }
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
-
 }
-
-
 
 export default RecommendedJobs;

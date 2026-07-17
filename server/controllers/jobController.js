@@ -1,15 +1,16 @@
 const Job = require("../models/Job");
 
+// Create Job
 const createJob = async (req, res) => {
   try {
     const job = await Job.create({
-  ...req.body,
-  recruiter: req.user._id,
-});
+      ...req.body,
+      recruiter: req.user.id,
+    });
 
     res.status(201).json({
       success: true,
-      message: "Job Created Successfully",
+      message: "Job created successfully",
       job,
     });
   } catch (error) {
@@ -19,6 +20,8 @@ const createJob = async (req, res) => {
     });
   }
 };
+
+// Get All Jobs
 const getAllJobs = async (req, res) => {
   try {
     const jobs = await Job.find().populate(
@@ -38,6 +41,8 @@ const getAllJobs = async (req, res) => {
     });
   }
 };
+
+// Get Job By ID
 const getJobById = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id).populate(
@@ -62,10 +67,28 @@ const getJobById = async (req, res) => {
       message: error.message,
     });
   }
-};  
+};
+
+// Update Job
 const updateJob = async (req, res) => {
   try {
-    const job = await Job.findByIdAndUpdate(
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found",
+      });
+    }
+
+    if (job.recruiter.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const updatedJob = await Job.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
@@ -74,17 +97,10 @@ const updateJob = async (req, res) => {
       }
     );
 
-    if (!job) {
-      return res.status(404).json({
-        success: false,
-        message: "Job not found",
-      });
-    }
-
     res.status(200).json({
       success: true,
-      message: "Job Updated Successfully",
-      job,
+      message: "Job updated successfully",
+      job: updatedJob,
     });
   } catch (error) {
     res.status(500).json({
@@ -93,9 +109,11 @@ const updateJob = async (req, res) => {
     });
   }
 };
+
+// Delete Job
 const deleteJob = async (req, res) => {
   try {
-    const job = await Job.findByIdAndDelete(req.params.id);
+    const job = await Job.findById(req.params.id);
 
     if (!job) {
       return res.status(404).json({
@@ -104,9 +122,18 @@ const deleteJob = async (req, res) => {
       });
     }
 
+    if (job.recruiter.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    await job.deleteOne();
+
     res.status(200).json({
       success: true,
-      message: "Job Deleted Successfully",
+      message: "Job deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
@@ -114,12 +141,18 @@ const deleteJob = async (req, res) => {
       message: error.message,
     });
   }
-};  
+};
+
+// Get Recruiter's Jobs
 const getRecruiterJobs = async (req, res) => {
   try {
+    console.log("Logged in Recruiter ID:", req.user.id);
+
     const jobs = await Job.find({
-      recruiter: req.user._id,
-    }).sort({ createdAt: -1 });
+      recruiter: req.user.id,
+    });
+
+    console.log("Jobs Found:", jobs.length);
 
     res.status(200).json({
       success: true,
@@ -133,6 +166,7 @@ const getRecruiterJobs = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   createJob,
   getAllJobs,

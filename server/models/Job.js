@@ -20,15 +20,15 @@ const jobSchema = new mongoose.Schema(
       trim: true,
     },
 
-    employmentType: {
+    jobType: {
       type: String,
-      enum: ["Full-Time", "Part-Time", "Internship", "Contract"],
+      enum: ["Full-Time", "Part-Time", "Internship", "Remote"],
       default: "Full-Time",
     },
 
     experience: {
       type: String,
-      required: true,
+      default: "Fresher",
     },
 
     salary: {
@@ -51,11 +51,6 @@ const jobSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
     },
   },
   {

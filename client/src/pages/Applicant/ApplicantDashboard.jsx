@@ -1,14 +1,14 @@
 import {
   Box,
   Container,
-  Typography,
-  Paper,
   Grid,
+  Paper,
+  Typography,
 } from "@mui/material";
-
+import Sidebar from "../../components/common/Sidebar";
 import ProfileCard from "../../components/applicant/ProfileCard";
-import RecommendedJobs from "../../components/applicant/RecommendedJobs";
 import RecentApplications from "../../components/applicant/RecentApplications";
+import RecommendedJobs from "../../components/applicant/RecommendedJobs";
 
 function ApplicantDashboard() {
   const user =
@@ -38,10 +38,16 @@ function ApplicantDashboard() {
   ];
 
   return (
+  <Box sx={{ display: "flex", background: "#f5f7fb" }}>
+    {/* Sidebar */}
+    <Sidebar />
+
+    {/* Main Content */}
     <Box
       sx={{
+        ml: "260px",
+        width: "calc(100% - 260px)",
         minHeight: "100vh",
-        background: "#f5f7fb",
         py: 5,
       }}
     >
@@ -53,39 +59,23 @@ function ApplicantDashboard() {
             p: 4,
             borderRadius: 4,
             mb: 4,
-            background:
-              "linear-gradient(135deg,#2563EB,#7C3AED)",
+            background: "linear-gradient(135deg,#2563EB,#7C3AED)",
             color: "white",
           }}
         >
-          <Typography
-            variant="h3"
-            fontWeight="bold"
-          >
+          <Typography variant="h3" fontWeight="bold">
             Welcome, {user.name || "Applicant"} 👋
           </Typography>
 
-          <Typography
-            variant="h6"
-            sx={{
-              mt: 1,
-              opacity: 0.9,
-            }}
-          >
+          <Typography variant="h6" sx={{ mt: 1, opacity: 0.9 }}>
             Find your dream job with AI-powered recommendations.
           </Typography>
         </Paper>
 
-        {/* Statistics Cards */}
+        {/* Statistics */}
         <Grid container spacing={3}>
           {stats.map((item) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={3}
-              key={item.title}
-            >
+            <Grid item xs={12} sm={6} md={3} key={item.title}>
               <Paper
                 elevation={3}
                 sx={{
@@ -94,10 +84,7 @@ function ApplicantDashboard() {
                   textAlign: "center",
                 }}
               >
-                <Typography
-                  variant="h6"
-                  color="text.secondary"
-                >
+                <Typography variant="h6" color="text.secondary">
                   {item.title}
                 </Typography>
 
@@ -116,35 +103,20 @@ function ApplicantDashboard() {
           ))}
         </Grid>
 
-        {/* Main Dashboard Content */}
-        <Grid
-          container
-          spacing={3}
-          sx={{ mt: 2 }}
-        >
-          {/* Left Side */}
-          <Grid
-            item
-            xs={12}
-            md={8}
-          >
+        {/* Dashboard Content */}
+        <Grid container spacing={3} sx={{ mt: 2 }}>
+          <Grid item xs={12} md={8}>
             <RecommendedJobs />
-
             <RecentApplications />
           </Grid>
 
-          {/* Right Side */}
-          <Grid
-            item
-            xs={12}
-            md={4}
-          >
+          <Grid item xs={12} md={4}>
             <ProfileCard />
           </Grid>
         </Grid>
       </Container>
     </Box>
-  );
+  </Box>
+);
 }
-
 export default ApplicantDashboard;

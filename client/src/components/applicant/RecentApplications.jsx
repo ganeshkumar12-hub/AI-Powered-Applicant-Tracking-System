@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Paper,
   Typography,
@@ -8,45 +9,58 @@ import {
   TableHead,
   TableRow,
   Chip,
+  CircularProgress,
+  Box,
 } from "@mui/material";
 
-const applications = [
-  {
-    company: "Google",
-    role: "Frontend Developer",
-    status: "Under Review",
-  },
-  {
-    company: "Infosys",
-    role: "Java Developer",
-    status: "Shortlisted",
-  },
-  {
-    company: "Amazon",
-    role: "React Developer",
-    status: "Pending",
-  },
-  {
-    company: "Microsoft",
-    role: "Software Engineer",
-    status: "Rejected",
-  },
-];
+import { getMyApplications } from "../../services/applicationService";
 
 const getStatusColor = (status) => {
   switch (status) {
     case "Shortlisted":
       return "success";
-    case "Pending":
+    case "Applied":
+      return "primary";
+    case "Under Review":
+      return "info";
+    case "Interview":
       return "warning";
+    case "Hired":
+      return "success";
     case "Rejected":
       return "error";
     default:
-      return "info";
+      return "default";
   }
 };
 
 function RecentApplications() {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  const fetchApplications = async () => {
+    try {
+      const data = await getMyApplications();
+      setApplications(data);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ textAlign: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Paper
       elevation={3}
@@ -56,50 +70,66 @@ function RecentApplications() {
         borderRadius: 4,
       }}
     >
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        mb={3}
-      >
+      <Typography variant="h5" fontWeight="bold" mb={3}>
         📄 Recent Applications
       </Typography>
 
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <strong>Company</strong>
-              </TableCell>
-
-              <TableCell>
-                <strong>Role</strong>
-              </TableCell>
-
-              <TableCell>
-                <strong>Status</strong>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {applications.map((job, index) => (
-              <TableRow key={index}>
-                <TableCell>{job.company}</TableCell>
-
-                <TableCell>{job.role}</TableCell>
+      {applications.length === 0 ? (
+        <Typography align="center" color="text.secondary">
+          No applications found.
+        </Typography>
+      ) : (
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <strong>Company</strong>
+                </TableCell>
 
                 <TableCell>
-                  <Chip
-                    label={job.status}
-                    color={getStatusColor(job.status)}
-                  />
+                  <strong>Role</strong>
+                </TableCell>
+
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
+
+                <TableCell>
+                  <strong>Applied On</strong>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+
+            <TableBody>
+              {applications.map((application) => (
+                <TableRow key={application._id}>
+                  <TableCell>
+                    {application.job?.company}
+                  </TableCell>
+
+                  <TableCell>
+                    {application.job?.title}
+                  </TableCell>
+
+                  <TableCell>
+                    <Chip
+                      label={application.status}
+                      color={getStatusColor(application.status)}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    {new Date(
+                      application.createdAt
+                    ).toLocaleDateString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Paper>
   );
 }
