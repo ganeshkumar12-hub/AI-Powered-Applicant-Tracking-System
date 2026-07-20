@@ -24,10 +24,10 @@ const createJob = async (req, res) => {
 // Get All Jobs
 const getAllJobs = async (req, res) => {
   try {
-    const jobs = await Job.find().populate(
-      "recruiter",
-      "name email company"
-    );
+    const jobs = await Job.find();
+
+    console.log("===== ALL JOBS =====");
+    console.log(JSON.stringify(jobs, null, 2));
 
     res.status(200).json({
       success: true,
@@ -41,7 +41,6 @@ const getAllJobs = async (req, res) => {
     });
   }
 };
-
 // Get Job By ID
 const getJobById = async (req, res) => {
   try {

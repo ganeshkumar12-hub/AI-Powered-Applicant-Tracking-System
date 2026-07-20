@@ -5,6 +5,7 @@ import {
   Assignment,
   Person,
   Logout,
+  Group,
 } from "@mui/icons-material";
 
 import {
@@ -22,13 +23,15 @@ import { useNavigate } from "react-router-dom";
 function Sidebar() {
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
   };
 
-  const menuItems = [
+  const applicantMenu = [
     {
       text: "Dashboard",
       icon: <Dashboard />,
@@ -55,6 +58,32 @@ function Sidebar() {
       path: "/profile",
     },
   ];
+
+  const recruiterMenu = [
+    {
+      text: "Dashboard",
+      icon: <Dashboard />,
+      path: "/recruiter",
+    },
+    {
+      text: "Jobs",
+      icon: <Work />,
+      path: "/jobs",
+    },
+    {
+      text: "Applicants",
+      icon: <Group />,
+      path: "/recruiter",
+    },
+    {
+      text: "Profile",
+      icon: <Person />,
+      path: "/profile",
+    },
+  ];
+
+  const menuItems =
+    user?.role === "recruiter" ? recruiterMenu : applicantMenu;
 
   return (
     <Box

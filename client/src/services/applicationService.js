@@ -12,6 +12,9 @@ const getAuthHeader = () => {
   };
 };
 
+// ===============================
+// Applicant - Apply for Job
+// ===============================
 export const applyForJob = async (jobId) => {
   const response = await axios.post(
     API_URL,
@@ -22,6 +25,9 @@ export const applyForJob = async (jobId) => {
   return response.data;
 };
 
+// ===============================
+// Applicant - My Applications
+// ===============================
 export const getMyApplications = async () => {
   const response = await axios.get(
     `${API_URL}/my-applications`,
@@ -29,4 +35,32 @@ export const getMyApplications = async () => {
   );
 
   return response.data.applications;
+};
+
+// ===============================
+// Recruiter - Get Applicants
+// ===============================
+export const getJobApplicants = async (jobId) => {
+  const response = await axios.get(
+    `${API_URL}/job/${jobId}`,
+    getAuthHeader()
+  );
+
+  return response.data.applications;
+};
+
+// ===============================
+// Recruiter - Update Status
+// ===============================
+export const updateApplicationStatus = async (
+  applicationId,
+  status
+) => {
+  const response = await axios.put(
+    `${API_URL}/${applicationId}/status`,
+    { status },
+    getAuthHeader()
+  );
+
+  return response.data;
 };

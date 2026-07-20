@@ -45,32 +45,31 @@ function LoginPage() {
   };
 
   const handleLogin = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await API.post("/login", formData);
+    const res = await API.post("/login", formData);
 
-      localStorage.setItem("token", res.data.token);
+    const user = res.data.user;
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(res.data.user)
-      );
+    // Save Login Details
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(user));
 
-      alert("Login Successful!");
+    alert("Login Successful!");
 
-      if (res.data.user.role === "Recruiter") {
-        navigate("/recruiter");
-      } else {
-        navigate("/applicant");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Login Failed");
-    } finally {
-      setLoading(false);
+    // Redirect Based on Role
+    if (user.role === "recruiter") {
+      navigate("/recruiter");
+    } else {
+      navigate("/applicant");
     }
-  };
-
+  } catch (err) {
+    alert(err.response?.data?.message || "Login Failed");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <Box
       sx={{
