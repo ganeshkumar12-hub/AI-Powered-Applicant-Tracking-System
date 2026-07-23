@@ -4,7 +4,10 @@ import {
   Grid,
   Paper,
   Typography,
+  Button,
 } from "@mui/material";
+
+import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../../components/common/Sidebar";
 import MyJobs from "./MyJobs";
@@ -12,6 +15,8 @@ import MyJobs from "./MyJobs";
 function RecruiterDashboard() {
   const user =
     JSON.parse(localStorage.getItem("user")) || {};
+
+  const navigate = useNavigate();
 
   const stats = [
     {
@@ -77,6 +82,23 @@ function RecruiterDashboard() {
               Manage your job postings and applicants.
             </Typography>
           </Paper>
+
+          {/* Create Job Button */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              mb: 3,
+            }}
+          >
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => navigate("/recruiter/create-job")}
+            >
+              + Create Job
+            </Button>
+          </Box>
 
           {/* Statistics */}
           <Grid container spacing={4} sx={{ mb: 4 }}>

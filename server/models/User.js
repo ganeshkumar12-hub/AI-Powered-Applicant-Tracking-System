@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    resume: {
+  type: String,
+  default: "",
+},
   },
   {
     timestamps: true,

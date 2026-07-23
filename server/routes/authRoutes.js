@@ -9,6 +9,7 @@ const {
 
 router.post("/register", register);
 router.post("/login", login);
+
 const User = require("../models/User");
 
 router.get("/all-users", async (req, res) => {
