@@ -17,6 +17,7 @@ import {
   Button,
   Snackbar,
   Alert,
+  Stack,
 } from "@mui/material";
 
 import {
@@ -161,6 +162,10 @@ function ApplicantsPage() {
                   </TableCell>
 
                   <TableCell>
+                    <strong>Resume</strong>
+                  </TableCell>
+
+                  <TableCell>
                     <strong>Update</strong>
                   </TableCell>
                 </TableRow>
@@ -220,6 +225,37 @@ function ApplicantsPage() {
                           </MenuItem>
                         </Select>
                       </FormControl>
+                    </TableCell>
+
+                    <TableCell>
+                      {application.applicant?.resume ? (
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            component="a"
+                            href={`http://localhost:5000/${application.applicant.resume.replace(/\\/g, "/")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View
+                          </Button>
+
+                          <Button
+                            variant="contained"
+                            size="small"
+                            component="a"
+                            href={`http://localhost:5000/${application.applicant.resume.replace(/\\/g, "/")}`}
+                            download
+                          >
+                            Download
+                          </Button>
+                        </Stack>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          Not Uploaded
+                        </Typography>
+                      )}
                     </TableCell>
 
                     <TableCell>
