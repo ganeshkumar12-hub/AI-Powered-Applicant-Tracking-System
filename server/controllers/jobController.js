@@ -22,12 +22,48 @@ const createJob = async (req, res) => {
 };
 
 // Get All Jobs
+// Get All Jobs (Search & Filter)
 const getAllJobs = async (req, res) => {
   try {
-    const jobs = await Job.find();
+    const {
+      title,
+      company,
+      location,
+      jobType,
+    } = req.query;
 
-    console.log("===== ALL JOBS =====");
-    console.log(JSON.stringify(jobs, null, 2));
+    const filter = {};
+
+    // Search by Title
+    if (title) {
+      filter.title = {
+        $regex: title,
+        $options: "i",
+      };
+    }
+
+    // Filter by Company
+    if (company) {
+      filter.company = {
+        $regex: company,
+        $options: "i",
+      };
+    }
+
+    // Filter by Location
+    if (location) {
+      filter.location = {
+        $regex: location,
+        $options: "i",
+      };
+    }
+
+    // Filter by Job Type
+    if (jobType) {
+      filter.jobType = jobType;
+    }
+
+    const jobs = await Job.find(filter);
 
     res.status(200).json({
       success: true,
