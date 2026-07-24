@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -5,12 +6,13 @@ import {
   Paper,
   Typography,
   Button,
+  CircularProgress,
 } from "@mui/material";
-
 import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../../components/common/Sidebar";
 import MyJobs from "./MyJobs";
+import { getDashboardStats } from "../../services/jobService";
 
 function RecruiterDashboard() {
   const user =
@@ -18,23 +20,78 @@ function RecruiterDashboard() {
 
   const navigate = useNavigate();
 
-  const stats = [
+  const [loading, setLoading] = useState(true);
+
+  const [stats, setStats] = useState({
+    jobsPosted: 0,
+    applications: 0,
+    activeJobs: 0,
+    shortlisted: 0,
+    selected: 0,
+    rejected: 0,
+  });
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const data = await getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  const dashboardCards = [
     {
       title: "Jobs Posted",
-      value: "--",
+      value: stats.jobsPosted,
       color: "#2563EB",
     },
     {
       title: "Applications",
-      value: "--",
+      value: stats.applications,
       color: "#10B981",
     },
     {
       title: "Active Jobs",
-      value: "--",
+      value: stats.activeJobs,
       color: "#F59E0B",
     },
+    {
+      title: "Shortlisted",
+      value: stats.shortlisted,
+      color: "#7C3AED",
+    },
+    {
+      title: "Selected",
+      value: stats.selected,
+      color: "#16A34A",
+    },
+    {
+      title: "Rejected",
+      value: stats.rejected,
+      color: "#DC2626",
+    },
   ];
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mt: 10,
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -43,10 +100,8 @@ function RecruiterDashboard() {
         background: "#f5f7fb",
       }}
     >
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
       <Box
         sx={{
           ml: "260px",
@@ -56,7 +111,6 @@ function RecruiterDashboard() {
         }}
       >
         <Container maxWidth="xl">
-          {/* Welcome Banner */}
           <Paper
             elevation={3}
             sx={{
@@ -83,7 +137,6 @@ function RecruiterDashboard() {
             </Typography>
           </Paper>
 
-          {/* Create Job Button */}
           <Box
             sx={{
               display: "flex",
@@ -94,16 +147,23 @@ function RecruiterDashboard() {
             <Button
               variant="contained"
               size="large"
-              onClick={() => navigate("/recruiter/create-job")}
+              onClick={() =>
+                navigate("/recruiter/create-job")
+              }
             >
               + Create Job
             </Button>
           </Box>
 
-          {/* Statistics */}
-          <Grid container spacing={4} sx={{ mb: 4 }}>
-            {stats.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.title}>
+          <Grid container spacing={4}>
+            {dashboardCards.map((card) => (
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={card.title}
+              >
                 <Paper
                   elevation={3}
                   sx={{
@@ -116,7 +176,7 @@ function RecruiterDashboard() {
                     variant="h6"
                     color="text.secondary"
                   >
-                    {item.title}
+                    {card.title}
                   </Typography>
 
                   <Typography
@@ -124,18 +184,17 @@ function RecruiterDashboard() {
                     fontWeight="bold"
                     sx={{
                       mt: 2,
-                      color: item.color,
+                      color: card.color,
                     }}
                   >
-                    {item.value}
+                    {card.value}
                   </Typography>
                 </Paper>
               </Grid>
             ))}
           </Grid>
 
-          {/* My Jobs */}
-          <Box sx={{ mt: 4 }}>
+          <Box sx={{ mt: 5 }}>
             <MyJobs />
           </Box>
         </Container>

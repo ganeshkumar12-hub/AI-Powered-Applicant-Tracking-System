@@ -9,6 +9,7 @@ const {
   updateJob,
   deleteJob,
   getRecruiterJobs,
+  getDashboardStats,
 } = require("../controllers/jobController");
 
 const {
@@ -17,6 +18,12 @@ const {
 } = require("../middleware/authMiddleware");
 
 // Public Routes
+router.get(
+  "/dashboard",
+  protect,
+  recruiterOnly,
+  getDashboardStats
+);
 router.get("/", getAllJobs);
 router.get("/my-jobs", protect, recruiterOnly, getRecruiterJobs);
 router.get("/:id", getJobById);

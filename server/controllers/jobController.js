@@ -1,5 +1,5 @@
 const Job = require("../models/Job");
-
+const Application = require("../models/Application");
 // Create Job
 const createJob = async (req, res) => {
   try {
@@ -165,6 +165,55 @@ const getRecruiterJobs = async (req, res) => {
     });
   }
 };
+// Recruiter Dashboard Statistics
+const getDashboardStats = async (req, res) => {
+  try {
+    // Recruiter's jobs
+    const jobs = await Job.find({
+      recruiter: req.user.id,
+    }).select("_id");
+
+    const jobIds = jobs.map((job) => job._id);
+
+    const jobsPosted = jobs.length;
+
+    const applications = await Application.countDocuments({
+      job: { $in: jobIds },
+    });
+
+    const shortlisted = await Application.countDocuments({
+      job: { $in: jobIds },
+      status: "Shortlisted",
+    });
+
+    const selected = await Application.countDocuments({
+      job: { $in: jobIds },
+      status: "Selected",
+    });
+
+    const rejected = await Application.countDocuments({
+      job: { $in: jobIds },
+      status: "Rejected",
+    });
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        jobsPosted,
+        applications,
+        activeJobs: jobsPosted,
+        shortlisted,
+        selected,
+        rejected,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   createJob,
@@ -173,4 +222,5 @@ module.exports = {
   updateJob,
   deleteJob,
   getRecruiterJobs,
+  getDashboardStats,
 };

@@ -39,7 +39,17 @@ export const getRecruiterJobs = async () => {
 
   return response.data.jobs;
 };
+// ===============================
+// Recruiter - Dashboard Statistics
+// ===============================
+export const getDashboardStats = async () => {
+  const response = await axios.get(
+    `${API_URL}/dashboard`,
+    getAuthHeader()
+  );
 
+  return response.data.stats;
+};
 // ===============================
 // Recruiter - Create Job
 // ===============================
