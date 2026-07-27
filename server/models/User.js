@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Name is required"],
       trim: true,
     },
+
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -14,30 +15,66 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+
     password: {
       type: String,
       required: [true, "Password is required"],
       minlength: 6,
     },
+
     role: {
       type: String,
       enum: ["recruiter", "applicant"],
       required: true,
     },
+
     company: {
       type: String,
       default: "",
       trim: true,
     },
+
     phone: {
       type: String,
       default: "",
       trim: true,
     },
+
     resume: {
-  type: String,
-  default: "",
-},
+      type: String,
+      default: "",
+    },
+
+    location: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    about: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    skills: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
+    education: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    experience: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   {
     timestamps: true,

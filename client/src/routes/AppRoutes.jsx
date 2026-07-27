@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "../pages/Home/HomePage";
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
-
+import MyApplications from "../pages/Applicant/MyApplications";
 import JobsPage from "../pages/Jobs/JobsPage";
 import JobDetailsPage from "../pages/Jobs/JobDetailsPage";
 
@@ -71,6 +71,10 @@ function AppRoutes() {
           path="*"
           element={<NotFoundPage />}
         />
+        <Route
+  path="/applications"
+  element={<MyApplications />}
+/>
       </Routes>
     </BrowserRouter>
   );

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -9,33 +10,83 @@ import Sidebar from "../../components/common/Sidebar";
 import ProfileCard from "../../components/applicant/ProfileCard";
 import RecentApplications from "../../components/applicant/RecentApplications";
 import RecommendedJobs from "../../components/applicant/RecommendedJobs";
+import { getMyApplications } from "../../services/applicationService";
 
 function ApplicantDashboard() {
   const user =
     JSON.parse(localStorage.getItem("user")) || {};
 
-  const stats = [
+  const [stats, setStats] = useState([
     {
       title: "Applied Jobs",
-      value: 12,
+      value: 0,
       color: "#2563EB",
     },
     {
-      title: "Resume Score",
-      value: "92%",
-      color: "#10B981",
-    },
-    {
       title: "Shortlisted",
-      value: 5,
+      value: 0,
       color: "#F59E0B",
     },
     {
       title: "Interviews",
-      value: 2,
+      value: 0,
       color: "#7C3AED",
     },
-  ];
+    {
+      title: "Selected",
+      value: 0,
+      color: "#10B981",
+    },
+  ]);
+
+  const loadDashboardStats = async () => {
+    try {
+      const applications = await getMyApplications();
+
+      const applied = applications.length;
+
+      const shortlisted = applications.filter(
+        (app) => app.status === "Shortlisted"
+      ).length;
+
+      const interviews = applications.filter(
+        (app) => app.status === "Interview"
+      ).length;
+
+      const selected = applications.filter(
+        (app) => app.status === "Selected"
+      ).length;
+
+      setStats([
+        {
+          title: "Applied Jobs",
+          value: applied,
+          color: "#2563EB",
+        },
+        {
+          title: "Shortlisted",
+          value: shortlisted,
+          color: "#F59E0B",
+        },
+        {
+          title: "Interviews",
+          value: interviews,
+          color: "#7C3AED",
+        },
+        {
+          title: "Selected",
+          value: selected,
+          color: "#10B981",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error loading dashboard stats:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardStats();
+  }, []);
 
   return (
   <Box sx={{ display: "flex", background: "#f5f7fb" }}>
