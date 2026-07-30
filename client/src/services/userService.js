@@ -75,3 +75,15 @@ export const analyzeResume = async () => {
 
   return response.data;
 };
+// ==========================
+// Job Match
+// ==========================
+export const jobMatch = async (jobDescription) => {
+  const response = await axios.post(
+    `${API_URL}/job-match`,
+    { jobDescription },
+    authHeader()
+  );
+
+  return response.data;
+};

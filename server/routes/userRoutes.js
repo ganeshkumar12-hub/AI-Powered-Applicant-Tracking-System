@@ -7,6 +7,7 @@ const {
   updateProfile,
   uploadResume,
   analyzeResume,
+  jobMatch,
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -16,6 +17,7 @@ const upload = require("../middleware/uploadMiddleware");
 // ===============================
 router.get("/profile", protect, getProfile);
 router.get("/analyze-resume", protect, analyzeResume);
+router.post("/job-match", protect, jobMatch);
 // ===============================
 // Update Profile
 // ===============================

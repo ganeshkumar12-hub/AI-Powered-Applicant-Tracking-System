@@ -2,6 +2,7 @@ const User = require("../models/User");
 const fs = require("fs");
 const PDFParser = require("pdf2json");
 const calculateATSScore = require("../ai/atsScore");
+const calculateJobMatch = require("../ai/jobMatcher");
 
 // ===============================
 // Get Profile
@@ -27,15 +28,8 @@ const getProfile = async (req, res) => {
 // ===============================
 const updateProfile = async (req, res) => {
   try {
-    const {
-      name,
-      phone,
-      location,
-      about,
-      education,
-      experience,
-      skills,
-    } = req.body;
+    const { name, phone, location, about, education, experience, skills } =
+      req.body;
 
     const user = await User.findById(req.user.id);
 
@@ -167,7 +161,6 @@ const analyzeResume = async (req, res) => {
           matchedSkills: result.matchedSkills,
           suggestions: result.suggestions,
         });
-
       } catch (error) {
         return res.status(500).json({
           success: false,
@@ -177,7 +170,6 @@ const analyzeResume = async (req, res) => {
     });
 
     pdfParser.loadPDF(user.resume);
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -185,10 +177,82 @@ const analyzeResume = async (req, res) => {
     });
   }
 };
+// ===============================
+// Job Description Match
+// ===============================
+const jobMatch = async (req, res) => {
+  try {
+    const { jobDescription } = req.body;
 
+    if (!jobDescription) {
+      return res.status(400).json({
+        success: false,
+        message: "Job description is required",
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+
+    if (!user || !user.resume) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found",
+      });
+    }
+
+    const pdfParser = new PDFParser();
+
+    pdfParser.on("pdfParser_dataError", (errData) => {
+      return res.status(500).json({
+        success: false,
+        message: errData.parserError,
+      });
+    });
+
+    pdfParser.on("pdfParser_dataReady", (pdfData) => {
+      try {
+        let resumeText = "";
+
+        pdfData.Pages.forEach((page) => {
+          page.Texts.forEach((textItem) => {
+            textItem.R.forEach((r) => {
+              try {
+                resumeText += decodeURIComponent(r.T) + " ";
+              } catch {
+                resumeText += r.T + " ";
+              }
+            });
+          });
+        });
+        console.log("========== RESUME TEXT ==========");
+        console.log(resumeText);
+        console.log("=================================");
+        const result = calculateJobMatch(resumeText, jobDescription);
+
+        return res.status(200).json({
+          success: true,
+          ...result,
+        });
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          message: error.message,
+        });
+      }
+    });
+
+    pdfParser.loadPDF(user.resume);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   getProfile,
   updateProfile,
   uploadResume,
   analyzeResume,
+  jobMatch,
 };

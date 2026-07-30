@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -12,13 +11,15 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
 
 import Sidebar from "../../components/common/Sidebar";
 import {
+  analyzeResume,
   getProfile,
+  jobMatch,
   updateProfile,
   uploadResume,
-  analyzeResume,
 } from "../../services/userService";
 
 function ProfilePage() {
@@ -38,6 +39,17 @@ function ProfilePage() {
   const [resume, setResume] = useState("");
 
   const [atsLoading, setAtsLoading] = useState(false);
+  const [jobDescription, setJobDescription] = useState("");
+
+  const [matchLoading, setMatchLoading] = useState(false);
+
+  const [matchResult, setMatchResult] = useState({
+    matchScore: null,
+    matchedSkills: [],
+    missingSkills: [],
+    suggestions: [],
+    feedback: "",
+  });
 
   const [atsResult, setAtsResult] = useState({
     score: null,
@@ -102,9 +114,7 @@ function ProfilePage() {
       setSnackbar({
         open: true,
         severity: "error",
-        message:
-          error.response?.data?.message ||
-          "Failed to update profile",
+        message: error.response?.data?.message || "Failed to update profile",
       });
     }
   };
@@ -128,10 +138,46 @@ function ProfilePage() {
       setSnackbar({
         open: true,
         severity: "error",
-        message:
-          error.response?.data?.message ||
-          "Resume upload failed",
+        message: error.response?.data?.message || "Resume upload failed",
       });
+    }
+  };
+  const handleJobMatch = async () => {
+    if (!jobDescription.trim()) {
+      setSnackbar({
+        open: true,
+        severity: "warning",
+        message: "Please enter a job description",
+      });
+      return;
+    }
+
+    try {
+      setMatchLoading(true);
+
+      const result = await jobMatch(jobDescription);
+
+      setMatchResult({
+        matchScore: result.matchScore,
+        matchedSkills: result.matchedSkills,
+        missingSkills: result.missingSkills,
+        suggestions: result.suggestions,
+        feedback: result.feedback,
+      });
+
+      setSnackbar({
+        open: true,
+        severity: "success",
+        message: "Job matched successfully",
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        severity: "error",
+        message: error.response?.data?.message || "Job matching failed",
+      });
+    } finally {
+      setMatchLoading(false);
     }
   };
 
@@ -156,9 +202,7 @@ function ProfilePage() {
       setSnackbar({
         open: true,
         severity: "error",
-        message:
-          error.response?.data?.message ||
-          "Resume analysis failed",
+        message: error.response?.data?.message || "Resume analysis failed",
       });
     } finally {
       setAtsLoading(false);
@@ -193,11 +237,7 @@ function ProfilePage() {
               borderRadius: 4,
             }}
           >
-            <Typography
-              variant="h4"
-              fontWeight="bold"
-              mb={4}
-            >
+            <Typography variant="h4" fontWeight="bold" mb={4}>
               My Profile
             </Typography>
 
@@ -288,11 +328,7 @@ function ProfilePage() {
               </Grid>
 
               <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  sx={{ mb: 2 }}
-                >
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
                   Resume
                 </Typography>
 
@@ -301,18 +337,11 @@ function ProfilePage() {
                     📄 {resume.split("\\").pop().split("/").pop()}
                   </Typography>
                 ) : (
-                  <Typography sx={{ mb: 2 }}>
-                    No resume uploaded
-                  </Typography>
+                  <Typography sx={{ mb: 2 }}>No resume uploaded</Typography>
                 )}
 
-                <Button
-                  variant="outlined"
-                  component="label"
-                  sx={{ mr: 2 }}
-                >
+                <Button variant="outlined" component="label" sx={{ mr: 2 }}>
                   Upload Resume
-
                   <input
                     hidden
                     type="file"
@@ -327,7 +356,7 @@ function ProfilePage() {
                       variant="contained"
                       href={`http://localhost:5000/${resume.replace(
                         /\\/g,
-                        "/"
+                        "/",
                       )}`}
                       target="_blank"
                       sx={{ mr: 2 }}
@@ -348,11 +377,7 @@ function ProfilePage() {
               </Grid>
 
               <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={handleSave}
-                >
+                <Button variant="contained" size="large" onClick={handleSave}>
                   Save Profile
                 </Button>
               </Grid>
@@ -368,30 +393,17 @@ function ProfilePage() {
                       background: "#f8f9fa",
                     }}
                   >
-                    <Typography
-                      variant="h5"
-                      fontWeight="bold"
-                      gutterBottom
-                    >
+                    <Typography variant="h5" fontWeight="bold" gutterBottom>
                       AI Resume Analysis
                     </Typography>
 
-                    <Typography
-                      variant="h3"
-                      color="primary"
-                      fontWeight="bold"
-                    >
+                    <Typography variant="h3" color="primary" fontWeight="bold">
                       {atsResult.score}%
                     </Typography>
 
-                    <Typography sx={{ mt: 2 }}>
-                      ATS Score
-                    </Typography>
+                    <Typography sx={{ mt: 2 }}>ATS Score</Typography>
 
-                    <Typography
-                      variant="h6"
-                      sx={{ mt: 3 }}
-                    >
+                    <Typography variant="h6" sx={{ mt: 3 }}>
                       Matched Skills
                     </Typography>
 
@@ -404,35 +416,22 @@ function ProfilePage() {
                       }}
                     >
                       {atsResult.matchedSkills.map((skill) => (
-                        <Chip
-                          key={skill}
-                          label={skill}
-                          color="success"
-                        />
+                        <Chip key={skill} label={skill} color="success" />
                       ))}
                     </Box>
 
-                    <Typography
-                      variant="h6"
-                      sx={{ mt: 3 }}
-                    >
+                    <Typography variant="h6" sx={{ mt: 3 }}>
                       Suggestions
                     </Typography>
 
                     {atsResult.suggestions.length === 0 ? (
-                      <Alert
-                        severity="success"
-                        sx={{ mt: 1 }}
-                      >
-                        Excellent! Your resume already includes all recommended sections.
+                      <Alert severity="success" sx={{ mt: 1 }}>
+                        Excellent! Your resume already includes all recommended
+                        sections.
                       </Alert>
                     ) : (
                       atsResult.suggestions.map((item, index) => (
-                        <Alert
-                          key={index}
-                          severity="warning"
-                          sx={{ mt: 1 }}
-                        >
+                        <Alert key={index} severity="warning" sx={{ mt: 1 }}>
                           {item}
                         </Alert>
                       ))
@@ -440,6 +439,113 @@ function ProfilePage() {
                   </Paper>
                 </Grid>
               )}
+
+              <Grid item xs={12}>
+                <Paper
+                  elevation={2}
+                  sx={{
+                    mt: 3,
+                    p: 3,
+                    borderRadius: 3,
+                    background: "#f8f9fa",
+                  }}
+                >
+                  <Typography variant="h5" fontWeight="bold" gutterBottom>
+                    AI Job Match Analyzer
+                  </Typography>
+
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={8}
+                    label="Paste Job Description"
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    sx={{ mt: 2 }}
+                  />
+
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    sx={{ mt: 2 }}
+                    onClick={handleJobMatch}
+                    disabled={matchLoading}
+                  >
+                    {matchLoading ? "Analyzing..." : "Analyze Job Match"}
+                  </Button>
+
+                  {matchResult.matchScore !== null && (
+                    <>
+                      <Typography
+                        variant="h3"
+                        color="secondary"
+                        fontWeight="bold"
+                        sx={{ mt: 3 }}
+                      >
+                        {matchResult.matchScore}%
+                      </Typography>
+
+                      <Typography sx={{ mt: 1 }}>Resume Match Score</Typography>
+
+                      <Typography variant="h6" sx={{ mt: 3 }}>
+                        Matched Skills
+                      </Typography>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 1,
+                          mt: 1,
+                        }}
+                      >
+                        {matchResult.matchedSkills.map((skill) => (
+                          <Chip key={skill} label={skill} color="success" />
+                        ))}
+                      </Box>
+
+                      <Typography variant="h6" sx={{ mt: 3 }}>
+                        Missing Skills
+                      </Typography>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 1,
+                          mt: 1,
+                        }}
+                      >
+                        {matchResult.missingSkills.map((skill) => (
+                          <Chip key={skill} label={skill} color="error" />
+                        ))}
+                      </Box>
+
+                      <Typography variant="h6" sx={{ mt: 3 }}>
+                        AI Resume Feedback
+                      </Typography>
+
+                      <Alert
+                        severity="success"
+                        sx={{
+                          mt: 1,
+                          borderRadius: 2,
+                          fontSize: "15px",
+                          lineHeight: 1.8,
+                        }}
+                      >
+                        {matchResult.feedback}
+                      </Alert>
+
+                      {matchResult.suggestions.map((item, index) => (
+                        <Alert key={index} severity="info" sx={{ mt: 1 }}>
+                          {item}
+                        </Alert>
+                      ))}
+                    </>
+                  )}
+                </Paper>
+              </Grid>
             </Grid>
           </Paper>
         </Container>
@@ -454,10 +560,7 @@ function ProfilePage() {
             })
           }
         >
-          <Alert
-            severity={snackbar.severity}
-            sx={{ width: "100%" }}
-          >
+          <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
             {snackbar.message}
           </Alert>
         </Snackbar>
