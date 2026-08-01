@@ -75,6 +75,20 @@ const userSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    atsScore: {
+  type: Number,
+  default: 0,
+},
+
+matchedSkills: {
+  type: [String],
+  default: [],
+},
+
+missingSkills: {
+  type: [String],
+  default: [],
+},
   },
   {
     timestamps: true,

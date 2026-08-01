@@ -137,7 +137,7 @@ const analyzeResume = async (req, res) => {
       });
     });
 
-    pdfParser.on("pdfParser_dataReady", (pdfData) => {
+    pdfParser.on("pdfParser_dataReady", async (pdfData) => {
       try {
         let text = "";
 
@@ -155,12 +155,26 @@ const analyzeResume = async (req, res) => {
 
         const result = calculateATSScore(text);
 
-        return res.status(200).json({
-          success: true,
-          score: result.score,
-          matchedSkills: result.matchedSkills,
-          suggestions: result.suggestions,
-        });
+console.log("========== ATS RESULT ==========");
+console.log(result);
+
+// Save latest ATS result
+user.atsScore = result.score;
+user.matchedSkills = result.matchedSkills;
+user.atsSuggestions = result.suggestions;
+
+await user.save();
+
+console.log("========== USER AFTER SAVE ==========");
+console.log("ATS:", user.atsScore);
+console.log("Skills:", user.matchedSkills);
+
+return res.status(200).json({
+  success: true,
+  score: result.score,
+  matchedSkills: result.matchedSkills,
+  suggestions: result.suggestions,
+});
       } catch (error) {
         return res.status(500).json({
           success: false,
@@ -209,7 +223,7 @@ const jobMatch = async (req, res) => {
       });
     });
 
-    pdfParser.on("pdfParser_dataReady", (pdfData) => {
+    pdfParser.on("pdfParser_dataReady", async (pdfData) => {
       try {
         let resumeText = "";
 
@@ -224,9 +238,7 @@ const jobMatch = async (req, res) => {
             });
           });
         });
-        console.log("========== RESUME TEXT ==========");
-        console.log(resumeText);
-        console.log("=================================");
+
         const result = calculateJobMatch(resumeText, jobDescription);
 
         return res.status(200).json({

@@ -18,6 +18,7 @@ import {
   Snackbar,
   Alert,
   Stack,
+  Chip,
 } from "@mui/material";
 
 import {
@@ -150,6 +151,10 @@ function ApplicantsPage() {
                   </TableCell>
 
                   <TableCell>
+                    <strong>ATS Score</strong>
+                  </TableCell>
+
+                  <TableCell>
                     <strong>Job</strong>
                   </TableCell>
 
@@ -180,6 +185,41 @@ function ApplicantsPage() {
 
                     <TableCell>
                       {application.applicant?.email}
+                    </TableCell>
+
+                    <TableCell>
+                      <Stack spacing={1}>
+                        <Chip
+                          label={`${application.applicant?.atsScore || 0}%`}
+                          color={
+                            (application.applicant?.atsScore || 0) >= 75
+                              ? "success"
+                              : (application.applicant?.atsScore || 0) >= 50
+                              ? "warning"
+                              : "error"
+                          }
+                        />
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 0.5,
+                          }}
+                        >
+                          {application.applicant?.matchedSkills
+                            ?.slice(0, 4)
+                            .map((skill) => (
+                              <Chip
+                                key={skill}
+                                label={skill}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                              />
+                            ))}
+                        </Box>
+                      </Stack>
                     </TableCell>
 
                     <TableCell>

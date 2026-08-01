@@ -26,13 +26,29 @@ const applicationSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Applied", "Interview", "Shortlisted", "Rejected", "Selected"],
+      enum: [
+        "Applied",
+        "Interview",
+        "Shortlisted",
+        "Rejected",
+        "Selected",
+      ],
       default: "Applied",
+    },
+
+    atsScore: {
+      type: Number,
+      default: 0,
+    },
+
+    matchedSkills: {
+      type: [String],
+      default: [],
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 module.exports = mongoose.model("Application", applicationSchema);

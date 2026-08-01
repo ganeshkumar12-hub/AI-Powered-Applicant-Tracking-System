@@ -1,5 +1,6 @@
 const Application = require("../models/Application");
 const Job = require("../models/Job");
+const User = require("../models/User");
 
 const applyJob = async (req, res) => {
   try {
@@ -28,10 +29,19 @@ const applyJob = async (req, res) => {
       });
     }
 
-    const application = await Application.create({
-      applicant: req.user._id,
-      job: jobId,
-    });
+    const applicant = await User.findById(req.user._id);
+
+console.log("========== APPLICANT DATA ==========");
+console.log("ATS Score:", applicant.atsScore);
+console.log("Matched Skills:", applicant.matchedSkills);
+console.log("===================================");
+
+const application = await Application.create({
+  applicant: req.user._id,
+  job: jobId,
+  atsScore: applicant?.atsScore || 0,
+  matchedSkills: applicant?.matchedSkills || [],
+});
 
     res.status(201).json({
       success: true,
@@ -70,9 +80,18 @@ const getJobApplicants = async (req, res) => {
     const applications = await Application.find({
       job: req.params.jobId,
     })
-      .populate("applicant", "name email resume")
-      .populate("job", "title company location");
+      .populate(
+  "applicant",
+  "name email resume atsScore matchedSkills"
+)
+.populate("job", "title company location");
 
+// Sort by ATS Score (Highest First)
+applications.sort(
+  (a, b) =>
+    (b.applicant?.atsScore || 0) -
+    (a.applicant?.atsScore || 0)
+);
     res.status(200).json({
       success: true,
       count: applications.length,
