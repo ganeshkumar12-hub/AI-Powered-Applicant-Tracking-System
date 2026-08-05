@@ -110,8 +110,12 @@ const uploadResume = async (req, res) => {
 // Analyze Resume ATS Score
 // ===============================
 const analyzeResume = async (req, res) => {
+  console.log("========== Analyze Resume API Called ==========");
+
   try {
     const user = await User.findById(req.user.id);
+    console.log("========== USER ==========");
+    console.log(user);
 
     if (!user || !user.resume) {
       return res.status(404).json({
@@ -138,6 +142,8 @@ const analyzeResume = async (req, res) => {
     });
 
     pdfParser.on("pdfParser_dataReady", async (pdfData) => {
+      console.log("========== PDF Parsed Successfully ==========");
+
       try {
         let text = "";
 
@@ -155,26 +161,26 @@ const analyzeResume = async (req, res) => {
 
         const result = calculateATSScore(text);
 
-console.log("========== ATS RESULT ==========");
-console.log(result);
+        console.log("========== ATS RESULT ==========");
+        console.log(result);
 
-// Save latest ATS result
-user.atsScore = result.score;
-user.matchedSkills = result.matchedSkills;
-user.atsSuggestions = result.suggestions;
+        // Save latest ATS result
+        user.atsScore = result.score;
+        user.matchedSkills = result.matchedSkills;
+        user.atsSuggestions = result.suggestions;
 
-await user.save();
+        await user.save();
 
-console.log("========== USER AFTER SAVE ==========");
-console.log("ATS:", user.atsScore);
-console.log("Skills:", user.matchedSkills);
+        console.log("========== USER AFTER SAVE ==========");
+        console.log("ATS:", user.atsScore);
+        console.log("Skills:", user.matchedSkills);
 
-return res.status(200).json({
-  success: true,
-  score: result.score,
-  matchedSkills: result.matchedSkills,
-  suggestions: result.suggestions,
-});
+        return res.status(200).json({
+          success: true,
+          score: result.score,
+          matchedSkills: result.matchedSkills,
+          suggestions: result.suggestions,
+        });
       } catch (error) {
         return res.status(500).json({
           success: false,
@@ -182,6 +188,8 @@ return res.status(200).json({
         });
       }
     });
+
+    console.log("Loading PDF:", user.resume);
 
     pdfParser.loadPDF(user.resume);
   } catch (error) {

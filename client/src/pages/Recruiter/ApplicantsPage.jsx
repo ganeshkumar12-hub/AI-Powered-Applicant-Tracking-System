@@ -1,25 +1,26 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import {
-  Paper,
-  Typography,
-  CircularProgress,
+  Alert,
   Box,
+  Button,
+  Chip,
+  CircularProgress,
+  FormControl,
+  MenuItem,
+  Paper,
+  Select,
+  Snackbar,
+  Stack,
   Table,
+  TableBody,
+  TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  TableContainer,
-  FormControl,
-  Select,
-  MenuItem,
-  Button,
-  Snackbar,
-  Alert,
-  Stack,
-  Chip,
+  Tooltip,
+  Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import {
   getJobApplicants,
@@ -200,25 +201,47 @@ function ApplicantsPage() {
                           }
                         />
 
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 0.5,
-                          }}
+                        <Tooltip
+                          title={
+                            application.applicant?.matchedSkills?.length
+                              ? application.applicant.matchedSkills.join(", ")
+                              : "No matched skills"
+                          }
+                          arrow
                         >
-                          {application.applicant?.matchedSkills
-                            ?.slice(0, 4)
-                            .map((skill) => (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: 0.5,
+                              cursor: "pointer",
+                            }}
+                          >
+                            {application.applicant?.matchedSkills
+                              ?.slice(0, 4)
+                              .map((skill) => (
+                                <Chip
+                                  key={skill}
+                                  label={skill}
+                                  size="small"
+                                  color="primary"
+                                  variant="outlined"
+                                />
+                              ))}
+
+                            {application.applicant?.matchedSkills?.length >
+                              4 && (
                               <Chip
-                                key={skill}
-                                label={skill}
+                                label={`+${
+                                  application.applicant.matchedSkills.length - 4
+                                }`}
                                 size="small"
-                                color="primary"
-                                variant="outlined"
+                                color="secondary"
+                                variant="filled"
                               />
-                            ))}
-                        </Box>
+                            )}
+                          </Box>
+                        </Tooltip>
                       </Stack>
                     </TableCell>
 
@@ -274,7 +297,10 @@ function ApplicantsPage() {
                             variant="outlined"
                             size="small"
                             component="a"
-                            href={`http://localhost:5000/${application.applicant.resume.replace(/\\/g, "/")}`}
+                            href={`http://localhost:5000/${application.applicant.resume.replace(
+                              /\\/g,
+                              "/"
+                            )}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -285,14 +311,20 @@ function ApplicantsPage() {
                             variant="contained"
                             size="small"
                             component="a"
-                            href={`http://localhost:5000/${application.applicant.resume.replace(/\\/g, "/")}`}
+                            href={`http://localhost:5000/${application.applicant.resume.replace(
+                              /\\/g,
+                              "/"
+                            )}`}
                             download
                           >
                             Download
                           </Button>
                         </Stack>
                       ) : (
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                        >
                           Not Uploaded
                         </Typography>
                       )}
@@ -331,10 +363,7 @@ function ApplicantsPage() {
           horizontal: "right",
         }}
       >
-        <Alert
-          severity={snackbar.severity}
-          variant="filled"
-        >
+        <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>

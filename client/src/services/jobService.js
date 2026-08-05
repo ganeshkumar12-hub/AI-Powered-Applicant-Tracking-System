@@ -15,9 +15,6 @@ const getAuthHeader = () => {
 // ===============================
 // Get All Jobs (Applicant)
 // ===============================
-// ===============================
-// Get All Jobs (Applicant)
-// ===============================
 export const getAllJobs = async (filters = {}) => {
   const response = await axios.get(API_URL, {
     params: filters,

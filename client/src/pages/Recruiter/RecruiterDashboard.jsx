@@ -9,7 +9,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
+import ApplicationsPieChart from "../../components/charts/ApplicationsPieChart";
+import ApplicationsBarChart from "../../components/charts/ApplicationsBarChart";
 import Sidebar from "../../components/common/Sidebar";
 import MyJobs from "./MyJobs";
 import { getDashboardStats } from "../../services/jobService";
@@ -195,7 +196,51 @@ function RecruiterDashboard() {
           </Grid>
 
           <Box sx={{ mt: 5 }}>
-            <MyJobs />
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={6}>
+                <Paper
+                  elevation={3}
+                  sx={{
+                    p: 3,
+                    borderRadius: 4,
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    mb={2}
+                  >
+                    Applications Overview
+                  </Typography>
+
+                  <ApplicationsPieChart stats={stats} />
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <MyJobs />
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Box sx={{ mt: 4 }}>
+            <Paper
+              elevation={3}
+              sx={{
+                p: 3,
+                borderRadius: 4,
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                mb={2}
+              >
+                Applications Status
+              </Typography>
+
+              <ApplicationsBarChart stats={stats} />
+            </Paper>
           </Box>
         </Container>
       </Box>

@@ -104,6 +104,37 @@ applications.sort(
     });
   }
 };
+// ===============================
+// Top Candidates
+// ===============================
+const getTopCandidates = async (req, res) => {
+  try {
+    const applications = await Application.find()
+      .populate(
+        "applicant",
+        "name email resume atsScore matchedSkills"
+      )
+      .populate("job", "title company");
+
+    applications.sort(
+      (a, b) =>
+        (b.applicant?.atsScore || 0) -
+        (a.applicant?.atsScore || 0)
+    );
+
+    const topCandidates = applications.slice(0, 5);
+
+    res.status(200).json({
+      success: true,
+      candidates: topCandidates,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};  
 const updateApplicationStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -142,4 +173,5 @@ module.exports = {
   getMyApplications,
   getJobApplicants,
   updateApplicationStatus,
+  getTopCandidates,
 };

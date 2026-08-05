@@ -7,6 +7,7 @@ const {
   getMyApplications,
   getJobApplicants,
   updateApplicationStatus,
+  getTopCandidates,
 } = require("../controllers/applicationController");
 
 const {
@@ -20,6 +21,12 @@ router.get("/my-applications", protect, getMyApplications);
 
 // Recruiter Routes
 router.get("/job/:jobId", protect, recruiterOnly, getJobApplicants);
+router.get(
+  "/top-candidates",
+  protect,
+  recruiterOnly,
+  getTopCandidates
+);
 
 router.put(
   "/:id/status",
