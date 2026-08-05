@@ -45,6 +45,26 @@ const applicationSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+
+    aiSummary: {
+      type: String,
+      default: "",
+    },
+
+    recommendation: {
+      type: String,
+      default: "",
+    },
+
+    strengths: {
+      type: [String],
+      default: [],
+    },
+
+    weaknesses: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,

@@ -19,6 +19,10 @@ import {
   TextField,
   Tooltip,
   Typography,
+  Dialog,
+DialogTitle,
+DialogContent,
+DialogActions,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -39,6 +43,8 @@ function ApplicantsPage() {
   const [sortBy, setSortBy] = useState("Newest");
   // Stores selected dropdown values
   const [selectedStatus, setSelectedStatus] = useState({});
+  const [selectedApplication, setSelectedApplication] = useState(null);
+const [openAIReport, setOpenAIReport] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -237,7 +243,21 @@ function ApplicantsPage() {
                   <TableCell>
                     <strong>Resume</strong>
                   </TableCell>
-
+                  <TableCell>
+  <strong>AI Report</strong>
+</TableCell>
+<TableCell>
+  <Button
+    variant="outlined"
+    color="secondary"
+    onClick={() => {
+      setSelectedApplication(application);
+      setOpenAIReport(true);
+    }}
+  >
+    View AI
+  </Button>
+</TableCell>
                   <TableCell>
                     <strong>Update</strong>
                   </TableCell>

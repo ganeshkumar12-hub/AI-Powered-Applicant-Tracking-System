@@ -1,10 +1,10 @@
 const Application = require("../models/Application");
 const Job = require("../models/Job");
 const User = require("../models/User");
-
+const generateCandidateSummary = require("../ai/candidateSummary");
 const applyJob = async (req, res) => {
   try {
-    const { jobId } = req.body;
+    const { jobId, coverLetter } = req.body;
 
     // Check whether job exists
     const job = await Job.findById(jobId);
@@ -36,11 +36,35 @@ console.log("ATS Score:", applicant.atsScore);
 console.log("Matched Skills:", applicant.matchedSkills);
 console.log("===================================");
 
+const recommendation =
+  applicant.atsScore >= 80
+    ? "Strong Candidate"
+    : applicant.atsScore >= 60
+    ? "Moderate Candidate"
+    : "Needs Improvement";
+
+const strengths = applicant.matchedSkills;
+
+const weaknesses = applicant.missingSkills || [];
+
+const aiSummary = generateCandidateSummary(
+  applicant.atsScore,
+  strengths,
+  weaknesses
+);
+
 const application = await Application.create({
-  applicant: req.user._id,
+  applicant: req.user.id,
   job: jobId,
-  atsScore: applicant?.atsScore || 0,
-  matchedSkills: applicant?.matchedSkills || [],
+  resume: applicant.resume,
+  coverLetter: coverLetter || "",
+  atsScore: applicant.atsScore,
+  matchedSkills: applicant.matchedSkills,
+
+  aiSummary,
+  recommendation,
+  strengths,
+  weaknesses,
 });
 
     res.status(201).json({
