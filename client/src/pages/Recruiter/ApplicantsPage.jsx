@@ -16,6 +16,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -32,7 +33,10 @@ function ApplicantsPage() {
 
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [atsFilter, setAtsFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("Newest");
   // Stores selected dropdown values
   const [selectedStatus, setSelectedStatus] = useState({});
 
@@ -135,6 +139,69 @@ function ApplicantsPage() {
         <Typography mb={3}>
           Total Applicants: {applications.length}
         </Typography>
+        <Box
+  sx={{
+    display: "flex",
+    gap: 2,
+    mb: 3,
+  }}
+>
+  <TextField
+    fullWidth
+    label="Search Applicant"
+    placeholder="Search by name..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+  />
+
+  <FormControl sx={{ minWidth: 220 }}>
+    <Select
+      value={statusFilter}
+      onChange={(e) =>
+        setStatusFilter(e.target.value)
+      }
+    >
+      <MenuItem value="All">All Status</MenuItem>
+      <MenuItem value="Applied">Applied</MenuItem>
+      <MenuItem value="Shortlisted">
+        Shortlisted
+      </MenuItem>
+      <MenuItem value="Interview">
+        Interview
+      </MenuItem>
+      <MenuItem value="Selected">
+        Selected
+      </MenuItem>
+      <MenuItem value="Rejected">
+        Rejected
+      </MenuItem>
+    </Select>
+  </FormControl>
+</Box>  
+<FormControl sx={{ minWidth: 160 }}>
+  <Select
+    value={atsFilter}
+    onChange={(e) => setAtsFilter(e.target.value)}
+  >
+    <MenuItem value="All">All ATS</MenuItem>
+    <MenuItem value="50">50%+</MenuItem>
+    <MenuItem value="60">60%+</MenuItem>
+    <MenuItem value="70">70%+</MenuItem>
+    <MenuItem value="80">80%+</MenuItem>
+    <MenuItem value="90">90%+</MenuItem>
+  </Select>
+</FormControl>
+<FormControl sx={{ minWidth: 180 }}>
+  <Select
+    value={sortBy}
+    onChange={(e) => setSortBy(e.target.value)}
+  >
+    <MenuItem value="Newest">Newest</MenuItem>
+    <MenuItem value="Oldest">Oldest</MenuItem>
+    <MenuItem value="Highest ATS">Highest ATS</MenuItem>
+    <MenuItem value="Lowest ATS">Lowest ATS</MenuItem>
+  </Select>
+</FormControl>
 
         {applications.length === 0 ? (
           <Typography>No applicants yet.</Typography>
@@ -178,7 +245,56 @@ function ApplicantsPage() {
               </TableHead>
 
               <TableBody>
-                {applications.map((application) => (
+                {applications
+  .filter((application) => {
+    const matchesSearch =
+      application.applicant?.name
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "All" ||
+      application.status === statusFilter;
+
+    const matchesATS =
+      atsFilter === "All" ||
+      (application.applicant?.atsScore || 0) >= Number(atsFilter);
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesATS
+    );
+  })
+  .sort((a, b) => {
+    switch (sortBy) {
+      case "Highest ATS":
+        return (
+          (b.applicant?.atsScore || 0) -
+          (a.applicant?.atsScore || 0)
+        );
+
+      case "Lowest ATS":
+        return (
+          (a.applicant?.atsScore || 0) -
+          (b.applicant?.atsScore || 0)
+        );
+
+      case "Oldest":
+        return (
+          new Date(a.createdAt) -
+          new Date(b.createdAt)
+        );
+
+      case "Newest":
+      default:
+        return (
+          new Date(b.createdAt) -
+          new Date(a.createdAt)
+        );
+    }
+  })
+  .map((application) => (
                   <TableRow key={application._id}>
                     <TableCell>
                       {application.applicant?.name}

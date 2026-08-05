@@ -157,6 +157,7 @@ const deleteJob = async (req, res) => {
       });
     }
 
+    // Check ownership
     if (job.recruiter.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
@@ -164,20 +165,27 @@ const deleteJob = async (req, res) => {
       });
     }
 
+    // Delete all applications related to this job
+    await Application.deleteMany({
+      job: job._id,
+    });
+
+    // Delete the job
     await job.deleteOne();
 
     res.status(200).json({
       success: true,
-      message: "Job deleted successfully",
+      message: "Job and all associated applications deleted successfully",
     });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 // Get Recruiter's Jobs
 const getRecruiterJobs = async (req, res) => {
   try {
