@@ -172,6 +172,7 @@ const updateApplicationStatus = async (req, res) => {
       }
     );
 
+
     if (!application) {
       return res.status(404).json({
         success: false,
@@ -192,10 +193,81 @@ const updateApplicationStatus = async (req, res) => {
     });
   }
 };
+const saveRecruiterNotes = async (req, res) => {
+  try {
+    const { notes } = req.body;
+
+    const application = await Application.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    application.recruiterNotes = notes;
+
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Recruiter notes saved successfully",
+      application,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const scheduleInterview = async (req, res) => {
+  try {
+    const {
+      interviewDate,
+      interviewTime,
+      interviewMode,
+      meetingLink,
+    } = req.body;
+
+    const application = await Application.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    application.interviewDate = interviewDate;
+    application.interviewTime = interviewTime;
+    application.interviewMode = interviewMode;
+    application.meetingLink = meetingLink;
+
+    // Automatically update status
+    application.status = "Interview";
+
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Interview scheduled successfully",
+      application,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   applyJob,
   getMyApplications,
   getJobApplicants,
   updateApplicationStatus,
   getTopCandidates,
+  saveRecruiterNotes,
+  scheduleInterview,
 };

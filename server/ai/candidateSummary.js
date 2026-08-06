@@ -4,14 +4,18 @@ const generateCandidateSummary = (
   missingSkills
 ) => {
   let recommendation = "";
+  let hiringDecision = "";
 
   if (atsScore >= 80) {
-    recommendation = "Strong Candidate";
-  } else if (atsScore >= 60) {
-    recommendation = "Moderate Candidate";
-  } else {
-    recommendation = "Needs Improvement";
-  }
+  recommendation = "Strong Candidate";
+  hiringDecision = "Recommended for Technical Interview";
+} else if (atsScore >= 60) {
+  recommendation = "Moderate Candidate";
+  hiringDecision = "Recommended for HR Screening";
+} else {
+  recommendation = "Needs Improvement";
+  hiringDecision = "Not Recommended";
+}
 
   return `
 Candidate Recommendation: ${recommendation}.
@@ -31,6 +35,7 @@ Missing skills: ${
   }.
 
 Overall, this candidate is suitable for further evaluation based on the current resume analysis.
+Hiring Decision: ${hiringDecision}
 `;
 };
 

@@ -64,3 +64,24 @@ export const updateApplicationStatus = async (
 
   return response.data;
 };
+export const saveRecruiterNotes = async (id, notes) => {
+  const response = await axios.put(
+    `${API_URL}/${id}/notes`,
+    { notes },
+    getAuthHeader()
+  );
+
+  return response.data;
+};
+export const scheduleInterview = async (
+  applicationId,
+  interviewData
+) => {
+  const response = await axios.put(
+    `${API_URL}/${applicationId}/interview`,
+    interviewData,
+    getAuthHeader()
+  );
+
+  return response.data;
+};

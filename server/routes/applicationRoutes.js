@@ -8,8 +8,9 @@ const {
   getJobApplicants,
   updateApplicationStatus,
   getTopCandidates,
+  saveRecruiterNotes,
+  scheduleInterview,
 } = require("../controllers/applicationController");
-
 const {
   protect,
   recruiterOnly,
@@ -33,6 +34,18 @@ router.put(
   protect,
   recruiterOnly,
   updateApplicationStatus
+);
+router.put(
+  "/:id/notes",
+  protect,
+  recruiterOnly,
+  saveRecruiterNotes
+);
+router.put(
+  "/:id/interview",
+  protect,
+  recruiterOnly,
+  scheduleInterview
 );
 
 module.exports = router;

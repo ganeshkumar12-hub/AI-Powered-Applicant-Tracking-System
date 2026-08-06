@@ -65,7 +65,32 @@ const applicationSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    recruiterNotes: {
+  type: String,
+  default: "",
+},
+interviewDate: {
+  type: Date,
+  default: null,
+},
+
+interviewTime: {
+  type: String,
+  default: "",
+},
+
+interviewMode: {
+  type: String,
+  enum: ["Online", "Offline"],
+  default: "Online",
+},
+
+meetingLink: {
+  type: String,
+  default: "",
+},
   },
+  
   {
     timestamps: true,
   }
