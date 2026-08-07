@@ -1,6 +1,7 @@
 const Application = require("../models/Application");
 const Job = require("../models/Job");
 const User = require("../models/User");
+const sendEmail = require("../utils/sendEmail");
 const generateCandidateSummary = require("../ai/candidateSummary");
 const applyJob = async (req, res) => {
   try {
@@ -30,6 +31,7 @@ const applyJob = async (req, res) => {
     }
 
     const applicant = await User.findById(req.user._id);
+    
 
 console.log("========== APPLICANT DATA ==========");
 console.log("ATS Score:", applicant.atsScore);
@@ -65,6 +67,23 @@ const application = await Application.create({
   recommendation,
   strengths,
   weaknesses,
+});
+await sendEmail({
+  to: applicant.email,
+  subject: "Application Submitted Successfully",
+  html: `
+    <h2>Application Received</h2>
+
+    <p>Hello <b>${applicant.name}</b>,</p>
+
+    <p>Your application for the position of <b>${job.title}</b> at <b>${job.company}</b> has been submitted successfully.</p>
+
+    <p>Current Status: <b>Applied</b></p>
+
+    <br>
+
+    <p>Thank you for using AI ATS.</p>
+  `,
 });
 
     res.status(201).json({

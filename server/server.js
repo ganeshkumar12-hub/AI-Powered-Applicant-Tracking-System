@@ -1,4 +1,5 @@
 require("dotenv").config();
+console.log("EMAIL USER:", process.env.EMAIL_USER); 
 
 const app = require("./app");
 const connectDB = require("./config/db");
