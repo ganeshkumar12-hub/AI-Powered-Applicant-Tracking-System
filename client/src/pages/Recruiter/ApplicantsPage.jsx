@@ -23,15 +23,14 @@ import {
   TextField,
   Tooltip,
   Typography,
-  
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   getJobApplicants,
-  updateApplicationStatus,
   saveRecruiterNotes,
   scheduleInterview,
+  updateApplicationStatus,
 } from "../../services/applicationService";
 
 function ApplicantsPage() {
@@ -43,19 +42,19 @@ function ApplicantsPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [atsFilter, setAtsFilter] = useState("All");
   const [sortBy, setSortBy] = useState("Newest");
-  // Stores selected dropdown values
   const [selectedStatus, setSelectedStatus] = useState({});
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [openAIReport, setOpenAIReport] = useState(false);
   const [notes, setNotes] = useState("");
   const [openInterviewDialog, setOpenInterviewDialog] = useState(false);
+  const [savingInterview, setSavingInterview] = useState(false);
 
-const [interviewData, setInterviewData] = useState({
-  interviewDate: "",
-  interviewTime: "",
-  interviewMode: "Online",
-  meetingLink: "",
-});
+  const [interviewData, setInterviewData] = useState({
+    interviewDate: "",
+    interviewTime: "",
+    interviewMode: "Online",
+    meetingLink: "",
+  });
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -66,13 +65,10 @@ const [interviewData, setInterviewData] = useState({
   const fetchApplicants = async () => {
     try {
       setLoading(true);
-
       const data = await getJobApplicants(jobId);
-
       setApplications(data);
     } catch (error) {
       console.error(error);
-
       setSnackbar({
         open: true,
         message: "Failed to load applicants",
@@ -97,7 +93,6 @@ const [interviewData, setInterviewData] = useState({
   const handleUpdate = async (id) => {
     try {
       const application = applications.find((app) => app._id === id);
-
       const status = selectedStatus[id] || application.status;
 
       await updateApplicationStatus(id, status);
@@ -108,12 +103,10 @@ const [interviewData, setInterviewData] = useState({
         severity: "success",
       });
 
-      // Update UI instantly
       setApplications((prev) =>
         prev.map((app) => (app._id === id ? { ...app, status } : app)),
       );
 
-      // Remove temporary selection
       setSelectedStatus((prev) => {
         const copy = { ...prev };
         delete copy[id];
@@ -121,7 +114,6 @@ const [interviewData, setInterviewData] = useState({
       });
     } catch (error) {
       console.error(error);
-
       setSnackbar({
         open: true,
         message: "Failed to update status",
@@ -142,10 +134,7 @@ const [interviewData, setInterviewData] = useState({
       setApplications((prev) =>
         prev.map((app) =>
           app._id === selectedApplication._id
-            ? {
-                ...app,
-                recruiterNotes: notes,
-              }
+            ? { ...app, recruiterNotes: notes }
             : app,
         ),
       );
@@ -162,6 +151,57 @@ const [interviewData, setInterviewData] = useState({
     }
   };
 
+  const handleSaveInterview = async () => {
+    if (!selectedApplication) return;
+
+    if (!interviewData.interviewDate || !interviewData.interviewTime) {
+      setSnackbar({
+        open: true,
+        message: "Please select an interview date and time",
+        severity: "error",
+      });
+      return;
+    }
+
+    try {
+      setSavingInterview(true);
+
+      await scheduleInterview(selectedApplication._id, interviewData);
+
+      setSnackbar({
+        open: true,
+        message: "Interview scheduled successfully!",
+        severity: "success",
+      });
+
+      // Reflect the "Interview" status locally
+      setApplications((prev) =>
+        prev.map((app) =>
+          app._id === selectedApplication._id
+            ? { ...app, status: "Interview" }
+            : app,
+        ),
+      );
+
+      setOpenInterviewDialog(false);
+      setInterviewData({
+        interviewDate: "",
+        interviewTime: "",
+        interviewMode: "Online",
+        meetingLink: "",
+      });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({
+        open: true,
+        message: "Failed to schedule interview",
+        severity: "error",
+      });
+    } finally {
+      setSavingInterview(false);
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ textAlign: "center", mt: 5 }}>
@@ -172,25 +212,13 @@ const [interviewData, setInterviewData] = useState({
 
   return (
     <>
-      <Paper
-        sx={{
-          p: 4,
-          m: 4,
-          borderRadius: 3,
-        }}
-      >
+      <Paper sx={{ p: 4, m: 4, borderRadius: 3 }}>
         <Typography variant="h4" fontWeight="bold" gutterBottom>
           Job Applicants
         </Typography>
 
         <Typography mb={3}>Total Applicants: {applications.length}</Typography>
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            mb: 3,
-          }}
-        >
+        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
           <TextField
             fullWidth
             label="Search Applicant"
@@ -245,35 +273,27 @@ const [interviewData, setInterviewData] = useState({
                   <TableCell>
                     <strong>Name</strong>
                   </TableCell>
-
                   <TableCell>
                     <strong>Email</strong>
                   </TableCell>
-
                   <TableCell>
                     <strong>ATS Score</strong>
                   </TableCell>
-
                   <TableCell>
                     <strong>Job</strong>
                   </TableCell>
-
                   <TableCell>
                     <strong>Company</strong>
                   </TableCell>
-
                   <TableCell>
                     <strong>Status</strong>
                   </TableCell>
-
                   <TableCell>
                     <strong>Resume</strong>
                   </TableCell>
-
                   <TableCell>
                     <strong>AI Report</strong>
                   </TableCell>
-
                   <TableCell>
                     <strong>Update</strong>
                   </TableCell>
@@ -305,16 +325,13 @@ const [interviewData, setInterviewData] = useState({
                           (b.applicant?.atsScore || 0) -
                           (a.applicant?.atsScore || 0)
                         );
-
                       case "Lowest ATS":
                         return (
                           (a.applicant?.atsScore || 0) -
                           (b.applicant?.atsScore || 0)
                         );
-
                       case "Oldest":
                         return new Date(a.createdAt) - new Date(b.createdAt);
-
                       case "Newest":
                       default:
                         return new Date(b.createdAt) - new Date(a.createdAt);
@@ -323,7 +340,6 @@ const [interviewData, setInterviewData] = useState({
                   .map((application) => (
                     <TableRow key={application._id}>
                       <TableCell>{application.applicant?.name}</TableCell>
-
                       <TableCell>{application.applicant?.email}</TableCell>
 
                       <TableCell>
@@ -366,14 +382,10 @@ const [interviewData, setInterviewData] = useState({
                                     variant="outlined"
                                   />
                                 ))}
-
                               {application.applicant?.matchedSkills?.length >
                                 4 && (
                                 <Chip
-                                  label={`+${
-                                    application.applicant.matchedSkills.length -
-                                    4
-                                  }`}
+                                  label={`+${application.applicant.matchedSkills.length - 4}`}
                                   size="small"
                                   color="secondary"
                                   variant="filled"
@@ -385,7 +397,6 @@ const [interviewData, setInterviewData] = useState({
                       </TableCell>
 
                       <TableCell>{application.job?.title}</TableCell>
-
                       <TableCell>{application.job?.company}</TableCell>
 
                       <TableCell sx={{ width: 220 }}>
@@ -403,16 +414,30 @@ const [interviewData, setInterviewData] = useState({
                             }
                           >
                             <MenuItem value="Applied">Applied</MenuItem>
-
                             <MenuItem value="Interview">Interview</MenuItem>
-
                             <MenuItem value="Shortlisted">Shortlisted</MenuItem>
-
                             <MenuItem value="Rejected">Rejected</MenuItem>
-
                             <MenuItem value="Selected">Selected</MenuItem>
                           </Select>
                         </FormControl>
+                        {application.interviewDate && (
+                          <Box sx={{ mt: 1 }}>
+                            <Typography variant="caption" display="block">
+                              📅{" "}
+                              {new Date(
+                                application.interviewDate,
+                              ).toLocaleDateString()}
+                            </Typography>
+
+                            <Typography variant="caption" display="block">
+                              🕒 {application.interviewTime}
+                            </Typography>
+
+                            <Typography variant="caption" display="block">
+                              💻 {application.interviewMode}
+                            </Typography>
+                          </Box>
+                        )}
                       </TableCell>
 
                       <TableCell>
@@ -422,10 +447,7 @@ const [interviewData, setInterviewData] = useState({
                               variant="outlined"
                               size="small"
                               component="a"
-                              href={`http://localhost:5000/${application.applicant.resume.replace(
-                                /\\/g,
-                                "/",
-                              )}`}
+                              href={`http://localhost:5000/${application.applicant.resume.replace(/\\/g, "/")}`}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -436,10 +458,7 @@ const [interviewData, setInterviewData] = useState({
                               variant="contained"
                               size="small"
                               component="a"
-                              href={`http://localhost:5000/${application.applicant.resume.replace(
-                                /\\/g,
-                                "/",
-                              )}`}
+                              href={`http://localhost:5000/${application.applicant.resume.replace(/\\/g, "/")}`}
                               download
                             >
                               Download
@@ -482,6 +501,95 @@ const [interviewData, setInterviewData] = useState({
           </TableContainer>
         )}
       </Paper>
+
+      <Dialog
+        open={openInterviewDialog}
+        onClose={() => setOpenInterviewDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Schedule Interview</DialogTitle>
+
+        <DialogContent>
+          <Typography sx={{ mt: 2, mb: 1 }} variant="subtitle2">
+            Interview Date
+          </Typography>
+          <TextField
+            fullWidth
+            type="date"
+            value={interviewData.interviewDate}
+            onChange={(e) =>
+              setInterviewData({
+                ...interviewData,
+                interviewDate: e.target.value,
+              })
+            }
+          />
+
+          <Typography sx={{ mt: 2, mb: 1 }} variant="subtitle2">
+            Interview Time
+          </Typography>
+          <TextField
+            fullWidth
+            type="time"
+            value={interviewData.interviewTime}
+            onChange={(e) =>
+              setInterviewData({
+                ...interviewData,
+                interviewTime: e.target.value,
+              })
+            }
+          />
+
+          <TextField
+            select
+            fullWidth
+            margin="normal"
+            label="Interview Mode"
+            value={interviewData.interviewMode}
+            onChange={(e) =>
+              setInterviewData({
+                ...interviewData,
+                interviewMode: e.target.value,
+              })
+            }
+          >
+            <MenuItem value="Online">Online</MenuItem>
+            <MenuItem value="Offline">Offline</MenuItem>
+          </TextField>
+
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Meeting Link"
+            placeholder="https://meet.google.com/..."
+            value={interviewData.meetingLink}
+            onChange={(e) =>
+              setInterviewData({
+                ...interviewData,
+                meetingLink: e.target.value,
+              })
+            }
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            onClick={() => setOpenInterviewDialog(false)}
+            disabled={savingInterview}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleSaveInterview}
+            disabled={savingInterview}
+          >
+            {savingInterview ? "Saving..." : "Save Interview"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* AI Report Dialog */}
       <Dialog
@@ -543,7 +651,6 @@ const [interviewData, setInterviewData] = useState({
                 <Typography variant="subtitle2" color="text.secondary">
                   Recommendation
                 </Typography>
-
                 <Chip
                   label={selectedApplication.recommendation}
                   color={
@@ -578,14 +685,7 @@ const [interviewData, setInterviewData] = useState({
                   >
                     Strengths
                   </Typography>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 1,
-                    }}
-                  >
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {selectedApplication.strengths.map((skill) => (
                       <Chip
                         key={skill}
@@ -607,14 +707,7 @@ const [interviewData, setInterviewData] = useState({
                   >
                     Missing Skills
                   </Typography>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 1,
-                    }}
-                  >
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {selectedApplication.weaknesses.map((skill) => (
                       <Chip
                         key={skill}
@@ -635,7 +728,6 @@ const [interviewData, setInterviewData] = useState({
                 >
                   Recruiter Notes
                 </Typography>
-
                 <TextField
                   fullWidth
                   multiline
@@ -652,42 +744,30 @@ const [interviewData, setInterviewData] = useState({
         </DialogContent>
 
         <DialogActions>
-  <Button
-    color="secondary"
-    variant="outlined"
-    onClick={() => setOpenInterviewDialog(true)}
-  >
-    Schedule Interview
-  </Button>
+          <Button
+            color="secondary"
+            variant="outlined"
+            onClick={() => {
+              setOpenAIReport(false);
+              setOpenInterviewDialog(true);
+            }}
+          >
+            Schedule Interview
+          </Button>
 
-  <Button
-    variant="contained"
-    onClick={handleSaveNotes}
-  >
-    Save Notes
-  </Button>
+          <Button variant="contained" onClick={handleSaveNotes}>
+            Save Notes
+          </Button>
 
-  <Button
-    onClick={() => setOpenAIReport(false)}
-  >
-    Close
-  </Button>
-</DialogActions>
+          <Button onClick={() => setOpenAIReport(false)}>Close</Button>
+        </DialogActions>
       </Dialog>
 
       <Snackbar
         open={snackbar.open}
         autoHideDuration={2500}
-        onClose={() =>
-          setSnackbar((prev) => ({
-            ...prev,
-            open: false,
-          }))
-        }
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}

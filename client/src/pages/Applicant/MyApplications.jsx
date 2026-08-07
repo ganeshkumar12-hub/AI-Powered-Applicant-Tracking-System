@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -103,7 +104,35 @@ function MyApplications() {
                           color={getChipColor(application.status)}
                         />
                       </Box>
+                      {application.interviewDate && (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="caption" display="block">
+                            📅{" "}
+                            {new Date(
+                              application.interviewDate,
+                            ).toLocaleDateString()}
+                          </Typography>
 
+                          <Typography variant="caption" display="block">
+                            🕒 {application.interviewTime}
+                          </Typography>
+
+                          <Typography variant="caption" display="block">
+                            💻 {application.interviewMode}
+                          </Typography>
+
+                          {application.meetingLink && (
+                            <Button
+                              size="small"
+                              href={application.meetingLink}
+                              target="_blank"
+                              sx={{ mt: 1 }}
+                            >
+                              Join Meeting
+                            </Button>
+                          )}
+                        </Box>
+                      )}
                       <Typography
                         variant="body2"
                         color="text.secondary"
